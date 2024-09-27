@@ -2,7 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import authRoute from "./routes/auth.route.js";
-
+import userRoute from "./routes/user.route.js";
 import ApiError from "./utils/ApiError.js";
 const app = express();
 
@@ -15,10 +15,11 @@ app.use(
     credentials: true,
   })
 );
-
 app.use(cookieParser());
 
 app.use("/api/auth", authRoute);
+app.use("/api/users", userRoute);
+
 
 app.all("*", (req, res, next) => {
   next(new ApiError("404", "Page not found"));
