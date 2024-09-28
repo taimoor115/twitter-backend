@@ -58,6 +58,9 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
+
+    resetPasswordToken: String,
+    resetPasswordTokenExpiresAt: Date,
     likedPosts: [
       {
         type: mongoose.Schema.Types.ObjectId,

@@ -1,10 +1,8 @@
 import app from "./app.js";
 import connectDatabase from "./db/index.js";
 import dotenv from "dotenv";
-
 dotenv.config();
 
-console.log(process.env.PORT, "Hello");
 const dbURL = process.env.MONGO_URL;
 
 connectDatabase(dbURL)

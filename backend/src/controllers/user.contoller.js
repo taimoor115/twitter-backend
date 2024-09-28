@@ -4,25 +4,19 @@ import ApiResponse from "../utils/ApiResponse.js";
 import asyncHandler from "../utils/asyncHandler.js";
 import Notification from "../models/notification.model.js";
 
-export const getUserProfile = async (req, res) => {
+export const getUserProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
-  try {
-    const user = await User.findOne({ username }).select("-password").lean();
-    if (!user) return res.status(404).json({ message: "User not found" });
+  const user = await User.findOne({ username }).select("-password").lean();
+  if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.status(200).json(user);
-  } catch (error) {
-    console.log("Error in getUserProfile: ", error.message);
-    res.status(500).json({ error: error.message });
-  }
-};
+  res.status(200).json(user);
+});
 
 export const followUnfollowUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const userToModify = await User.findById(id);
   const currentUser = await User.findById(req.user._id);
-  console.log("🚀 ~ followUnfollowUser ~ req.user._id:", req.user._id);
 
   if (id === req.user._id.toString()) {
     return next(new ApiError(400, "You can follow/unfollow yourself"));
@@ -33,7 +27,6 @@ export const followUnfollowUser = asyncHandler(async (req, res, next) => {
   }
 
   const isFollowing = currentUser.following.includes(id);
-  console.log("🚀 ~ followUnfollowUser ~ isFollowing:", isFollowing);
   if (isFollowing) {
     await User.findByIdAndUpdate(id, { $pull: { followers: req.user._id } });
     await User.findByIdAndUpdate(req.user._id, { $pull: { following: id } });
@@ -62,7 +55,6 @@ export const followUnfollowUser = asyncHandler(async (req, res, next) => {
 export const getSuggestedUser = asyncHandler(async (req, res, next) => {
   const userId = req.user._id;
   const userFollowedByMe = await User.findById(userId).select("following");
-  console.log("🚀 ~ getSuggestedUser ~ userFollowedByMe:", userFollowedByMe);
 
   const users = await User.aggregate([
     {

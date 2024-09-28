@@ -1,11 +1,16 @@
 import User from "../models/user.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import crypto from "crypto";
 import asyncHandler from "../utils/asyncHandler.js";
 import {
   generateRefreshAndAccessToken,
   options,
 } from "../utils/generateToken.js";
+import {
+  sendPasswordResetEmail,
+  sendPasswordResetSuccessEmail,
+} from "../sendMail/email.js";
 
 export const signUpUser = asyncHandler(async (req, res, next) => {
   const { username, email, password, fullName } = req.body;
@@ -56,10 +61,6 @@ export const loginUser = asyncHandler(async (req, res) => {
   const { refreshToken, accessToken } = await generateRefreshAndAccessToken(
     user._id,
     User
-  );
-
-  const loggedInUser = await User.findById(user._id).select(
-    "-password -refreshToken"
   );
 
   res
@@ -142,4 +143,54 @@ export const getMe = asyncHandler(async (req, res, next) => {
   return res
     .status(200)
     .json(new ApiResponse(200, "User feteched successfully", user));
+});
+
+export const forgotPassword = asyncHandler(async (req, res, next) => {
+  const { email } = req.body;
+
+  const user = await User.findOne({ email });
+  if (!user) return next(new ApiError(400, "Email is not correct..."));
+
+  const resetPasswordToken = crypto.randomBytes(20).toString("hex");
+  const resetPasswordTokenExpiresAt = Date.now() + 1 * 60 * 60 * 1000; // 1 hour
+
+  user.resetPasswordToken = resetPasswordToken;
+  user.resetPasswordTokenExpiresAt = resetPasswordTokenExpiresAt;
+
+  await user.save();
+
+  await sendPasswordResetEmail(
+    email,
+    `${process.env.CLIENT_URL}/reset-password/${resetPasswordToken}`
+  );
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Reset email send successfully..."));
+});
+
+export const resetPassword = asyncHandler(async (req, res, next) => {
+  const { token } = req.params;
+  const { password } = req.body;
+
+  const user = await User.findOne({
+    resetPasswordToken: token,
+    resetPasswordTokenExpiresAt: { $gt: Date.now() },
+  });
+
+  if (!user) {
+    return next(new ApiError(200, "Token expires..."));
+  }
+
+  if (!password) return next(new ApiError(200, "Password is required"));
+
+  user.password = password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordTokenExpiresAt = undefined;
+
+  await user.save();
+
+  await sendPasswordResetSuccessEmail(user.email);
+
+  res.status(200).json(new ApiResponse(200, "Password reset successfully..."));
 });
