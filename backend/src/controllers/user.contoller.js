@@ -7,7 +7,7 @@ import Notification from "../models/notification.model.js";
 export const getUserProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
-  const user = await User.findOne({ username }).select("-password").lean();
+  const user = await User.findOne({ username }).select("-password");
   if (!user) return res.status(404).json({ message: "User not found" });
 
   res.status(200).json(user);
@@ -38,10 +38,12 @@ export const followUnfollowUser = asyncHandler(async (req, res, next) => {
     await User.findByIdAndUpdate(id, { $push: { followers: req.user._id } });
     await User.findByIdAndUpdate(req.user._id, { $push: { following: id } });
 
+    console.log("Heloo", userToModify._id);
+
     const notification = new Notification({
       type: "follow",
       from: req.user._id,
-      to: id,
+      to: userToModify._id,
     });
 
     await notification.save();

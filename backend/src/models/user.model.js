@@ -69,7 +69,17 @@ const userSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+    toJSON: {
+      transform: (doc, ret) => {
+        ret.id = ret._id;
+        delete ret._id;
+
+        return ret;
+      },
+    },
+  }
 );
 
 userSchema.pre("save", async function (next) {
