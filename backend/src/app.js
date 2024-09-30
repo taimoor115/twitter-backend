@@ -5,6 +5,7 @@ import authRoute from "./routes/auth.route.js";
 import userRoute from "./routes/user.route.js";
 import notificationRoute from "./routes/notification.route.js";
 import ApiError from "./utils/ApiError.js";
+import { swaggerServe, swaggerSetup } from "./swagger.js";
 import postRouter from "./routes/post.route.js";
 const app = express();
 
@@ -19,6 +20,7 @@ app.use(
 );
 app.use(cookieParser());
 
+app.use("/api-docs", swaggerServe, swaggerSetup);
 app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/notifications", notificationRoute);
