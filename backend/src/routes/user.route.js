@@ -5,7 +5,7 @@ import {
   getSuggestedUser,
   getUserProfile,
 } from "../controllers/user.contoller.js";
-import { verifyJWT } from "../middleware.js/auth.middlware.js";
+import { verifyJWT } from "../middleware/auth.middlware.js";
 const router = Router();
 
 router.route("/getProfile/:username").get(verifyJWT, getUserProfile);

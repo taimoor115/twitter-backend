@@ -7,6 +7,7 @@ import notificationRoute from "./routes/notification.route.js";
 import ApiError from "./utils/ApiError.js";
 import { swaggerServe, swaggerSetup } from "./swagger.js";
 import postRouter from "./routes/post.route.js";
+import commentRoute from "./routes/comment.route.js";
 const app = express();
 
 app.use(express.json());
@@ -25,6 +26,7 @@ app.use("/api/auth", authRoute);
 app.use("/api/users", userRoute);
 app.use("/api/notifications", notificationRoute);
 app.use("/api/posts", postRouter);
+app.use("/api/comments", commentRoute);
 
 app.all("*", (req, res, next) => {
   next(new ApiError("404", "Page not found"));

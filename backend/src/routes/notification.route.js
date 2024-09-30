@@ -3,7 +3,7 @@ import {
   deleteNotifications,
   getNotifications,
 } from "../controllers/notification.controller.js";
-import { verifyJWT } from "../middleware.js/auth.middlware.js";
+import { verifyJWT } from "../middleware/auth.middlware.js";
 
 const router = Router();
 

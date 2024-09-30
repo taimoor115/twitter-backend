@@ -1,42 +1,5 @@
 import mongoose from "mongoose";
-
-const likeSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true,
-    },
-
-    post: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Post",
-      required: true,
-    },
-  },
-  {
-    timestamps: true,
-    toJSON: {
-      transform: (doc, ret) => {
-        ret.id = ret.id;
-        delete ret._id;
-        return ret.id;
-      },
-    },
-  }
-);
-
-const commentSchema = new mongoose.Schema({
-  text: {
-    type: String,
-    required: true,
-  },
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
-    required: true,
-  },
-});
+import Comment from "./comments.model.js";
 
 const postSchema = new mongoose.Schema(
   {
@@ -54,8 +17,18 @@ const postSchema = new mongoose.Schema(
     imgPublicId: {
       type: String,
     },
-    comments: [commentSchema],
-    likes: [likeSchema],
+    comments: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Comment",
+      },
+    ],
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Like",
+      },
+    ],
   },
   {
     timestamps: true,
@@ -69,6 +42,11 @@ const postSchema = new mongoose.Schema(
   }
 );
 
-const Post = mongoose.model("Post", postSchema);
+postSchema.post("findOneAndDelete", async (post) => {
+  if (post.comments.length) {
+    await Comment.deleteMany({ _id: { $in: post.comments } });
+  }
+});
 
+const Post = mongoose.model("Post", postSchema);
 export default Post;
