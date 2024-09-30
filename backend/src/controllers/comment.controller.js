@@ -1,4 +1,4 @@
-import Comment from "../models/comments.model.js";
+import Comment from "../models/comment.model.js";
 import Post from "../models/post.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
@@ -9,6 +9,8 @@ export const commentOnPost = asyncHandler(async (req, res, next) => {
 
   const userId = req.user._id;
   const { text } = req.body;
+
+  if (!text) return next(new ApiError(400, "Comment text is required"));
 
   const post = await Post.findById(postId);
   if (!post) return next(new ApiError(400, "Post not found..."));
@@ -50,4 +52,24 @@ export const deleteComment = asyncHandler(async (req, res, next) => {
   return res
     .status(200)
     .json(new ApiResponse(200, "Comment delete successfully..."));
+});
+
+export const editComment = asyncHandler(async (req, res, next) => {
+  const { text } = req.body;
+
+  if (!text) return next(new ApiError(400, "Comment text is required..."));
+
+  const { commentId } = req.params;
+
+  const comment = await Comment.findByIdAndUpdate(
+    commentId,
+    { text },
+    { new: true }
+  );
+
+  if (!comment) return next(new ApiError(400, "Comment not found..."));
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Comment updated successfully..."));
 });

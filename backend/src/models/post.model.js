@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import Comment from "./comments.model.js";
+import Comment from "./comment.model.js";
+import Like from "./like.model.js";
 
 const postSchema = new mongoose.Schema(
   {
@@ -46,7 +47,11 @@ postSchema.post("findOneAndDelete", async (post) => {
   if (post.comments.length) {
     await Comment.deleteMany({ _id: { $in: post.comments } });
   }
+  if (post.likes.length) {
+    await Like.deleteMany({ _id: { $in: post.likes } });
+  }
 });
+
 
 const Post = mongoose.model("Post", postSchema);
 export default Post;

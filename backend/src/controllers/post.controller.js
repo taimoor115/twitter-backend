@@ -1,4 +1,4 @@
-import Comment from "../models/comments.model.js";
+import Comment from "../models/comment.model.js";
 import Post from "../models/post.model.js";
 import User from "../models/user.model.js";
 import ApiError from "../utils/ApiError.js";
