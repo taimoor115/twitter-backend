@@ -32,7 +32,6 @@ export const commentOnPost = asyncHandler(async (req, res, next) => {
 export const deleteComment = asyncHandler(async (req, res, next) => {
   const { id, commentId } = req.params;
   const userId = req.user._id;
-
   const comment = await Comment.findById(commentId);
   if (!comment) return next(new ApiError(400, "No comment found..."));
 
@@ -73,3 +72,26 @@ export const editComment = asyncHandler(async (req, res, next) => {
     .status(200)
     .json(new ApiResponse(200, "Comment updated successfully..."));
 });
+
+export const replyOnComment = asyncHandler(async (req, res, next) => {
+  const { commentId } = req.params;
+  const { replyText } = req.body;
+
+  if (!replyText) return next(new ApiError(200, "Comment Text is required..."));
+
+  const comment = await Comment.findById(commentId);
+
+  if (!comment) return next(new ApiError(400, "Comment not found"));
+
+  const reply = {
+    text: replyText,
+    user: req.user._id,
+  };
+
+  comment.reply.push(reply);
+
+  await comment.save();
+
+  res.status(201).json(new ApiResponse(201, "Comment post successfully..."));
+});
+
